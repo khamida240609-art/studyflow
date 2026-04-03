@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "709091210970",
+    "project_id": "studysprint-5ca96",
+    "storage_bucket": "studysprint-5ca96.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:709091210970:android:c9272a2287d683074457e3",
+        "android_client_info": {
+          "package_name": "com.studysprint.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "709091210970-das47j85f90v5j9gdkhb0h183udvpvtg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.studysprint.app",
+            "certificate_hash": "ade03e44f6ac2cc052116fe6637dd237a63bc8ed"
+          }
+        },
+        {
+          "client_id": "709091210970-s18dvlqi2el36stk81gfdioufkul8k47.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfF6AafuphEqsbml-BOl0s0C82BNmfwWA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "709091210970-s18dvlqi2el36stk81gfdioufkul8k47.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
