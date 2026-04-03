@@ -1,0 +1,127 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc(uid) {
+      return get(/databases/$(database)/documents/users/$(uid));
+    }
+
+    function isAdmin() {
+      return signedIn() && userDoc(request.auth.uid).data.isAdmin == true;
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function ownsPost(postId) {
+      return signedIn() &&
+        get(/databases/$(database)/documents/posts/$(postId)).data.userId == request.auth.uid;
+    }
+
+    function claimResourceOwner() {
+      return signedIn() &&
+        (resource.data.ownerId == request.auth.uid ||
+         resource.data.claimantId == request.auth.uid);
+    }
+
+    match /users/{userId} {
+      allow read: signedIn() && (isSelf(userId) || isAdmin());
+      allow create: isSelf(userId);
+      allow update: isSelf(userId) || isAdmin();
+      allow delete: isAdmin();
+    }
+
+    match /user_preferences/{userId} {
+      allow read, create, update: isSelf(userId) || isAdmin();
+      allow delete: isAdmin();
+    }
+
+    match /posts/{postId} {
+      allow read: signedIn();
+      allow create: signedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: signedIn() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    match /matches/{matchId} {
+      allow read: signedIn();
+      allow create, update: signedIn() &&
+        request.resource.data.postIds.size() == 2 &&
+        (ownsPost(request.resource.data.postIds[0]) ||
+         ownsPost(request.resource.data.postIds[1]) ||
+         isAdmin());
+      allow delete: signedIn() &&
+        ((resource.data.postIds.size() == 2 &&
+          (ownsPost(resource.data.postIds[0]) ||
+           ownsPost(resource.data.postIds[1]))) ||
+         isAdmin());
+    }
+
+    match /communities/{communityId} {
+      allow read: signedIn();
+      allow write: isAdmin();
+    }
+
+    match /claims/{claimId} {
+      allow read: claimResourceOwner() || isAdmin();
+      allow create: signedIn() &&
+        request.resource.data.claimantId == request.auth.uid;
+      allow update: claimResourceOwner() || isAdmin();
+      allow delete: isAdmin();
+    }
+
+    match /pickup_schedules/{scheduleId} {
+      allow read: signedIn() &&
+        (resource.data.ownerId == request.auth.uid ||
+         resource.data.claimantId == request.auth.uid ||
+         isAdmin());
+      allow create: signedIn() &&
+        request.resource.data.ownerId == request.auth.uid;
+      allow update: signedIn() &&
+        (resource.data.ownerId == request.auth.uid ||
+         resource.data.claimantId == request.auth.uid ||
+         isAdmin());
+      allow delete: isAdmin();
+    }
+
+    match /chats/{chatId} {
+      allow read, update: signedIn() &&
+        request.auth.uid in resource.data.participantIds;
+      allow create: signedIn() &&
+        request.auth.uid in request.resource.data.participantIds;
+      allow delete: isAdmin();
+    }
+
+    match /messages/{messageId} {
+      allow read: signedIn() &&
+        (resource.data.senderId == request.auth.uid ||
+         resource.data.receiverId == request.auth.uid ||
+         isAdmin());
+      allow create: signedIn() &&
+        request.resource.data.senderId == request.auth.uid;
+      allow update: signedIn() &&
+        (resource.data.senderId == request.auth.uid ||
+         resource.data.receiverId == request.auth.uid ||
+         isAdmin());
+      allow delete: isAdmin();
+    }
+
+    match /notifications/{notificationId} {
+      allow read, update: signedIn() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: signedIn();
+      allow delete: isAdmin();
+    }
+
+    match /reports/{reportId} {
+      allow read: isAdmin();
+      allow create: signedIn() &&
+        request.resource.data.reporterId == request.auth.uid;
+      allow update, delete: isAdmin();
+    }
+  }
+}
